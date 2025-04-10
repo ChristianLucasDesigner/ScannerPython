@@ -1,0 +1,210 @@
+{% extends "menu/menu.html" %}
+
+{% block title %}Impressoras - Scanner TI{% endblock %}
+
+{% block header %}Impressoras{% endblock %}
+
+{% block content %}
+<div class="devices-container">
+    <div class="devices-header">
+        <h3><i class="fas fa-print"></i> Impressoras da Rede</h3>
+        <div class="devices-actions">
+            <button id="refresh-btn" class="refresh-btn">
+                <i class="fas fa-sync-alt"></i>
+                Atualizar
+            </button>
+            <button id="export-btn" class="export-btn">
+                <i class="fas fa-file-excel"></i>
+                Exportar
+            </button>
+        </div>
+    </div>
+
+    <div class="devices-grid" id="devices-list">
+        <!-- Os dispositivos serão carregados via JavaScript -->
+    </div>
+</div>
+
+<style>
+    .devices-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .devices-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .devices-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .devices-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .refresh-btn {
+        background: #334155;
+    }
+
+    .refresh-btn:hover {
+        background: #475569;
+    }
+
+    .export-btn {
+        background: #10b981;
+    }
+
+    .export-btn:hover {
+        background: #059669;
+    }
+
+    .devices-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .device-card {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #f59e0b;
+    }
+
+    .device-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .device-name {
+        font-weight: 500;
+        color: var(--text-light);
+    }
+
+    .device-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .device-info {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .device-info div {
+        margin-bottom: 0.25rem;
+    }
+
+    .device-info i {
+        width: 20px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .devices-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .devices-actions {
+            width: 100%;
+        }
+
+        .devices-actions button {
+            flex: 1;
+        }
+    }
+</style>
+
+<script>
+    function carregarDispositivos() {
+        fetch('/scan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ base_ip: '192.168.200' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const impressoras = data.impressoras;
+            const devicesList = $('#devices-list');
+            devicesList.empty();
+
+            impressoras.forEach(device => {
+                devicesList.append(`
+                    <div class="device-card">
+                        <div class="device-header">
+                            <div class="device-name">${device.hostname}</div>
+                            <div class="device-status status-active">Ativo</div>
+                        </div>
+                        <div class="device-info">
+                            <div><i class="fas fa-network-wired"></i> ${device.ip}</div>
+                            <div><i class="fas fa-clock"></i> Última verificação: ${data.timestamp}</div>
+                        </div>
+                    </div>
+                `);
+            });
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao carregar dispositivos');
+        });
+    }
+
+    // Carregar dispositivos ao entrar na página
+    carregarDispositivos();
+
+    // Atualizar ao clicar no botão
+    $('#refresh-btn').on('click', carregarDispositivos);
+
+    // Exportar para Excel
+    $('#export-btn').on('click', function() {
+        const dados = {
+            impressoras: $('.device-card').map(function() {
+                return {
+                    ip: $(this).find('.device-info div:first').text().split(' ')[1],
+                    hostname: $(this).find('.device-name').text(),
+                    status: $(this).find('.device-status').text()
+                };
+            }).get()
+        };
+
+        fetch('/exportar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Relatório exportado com sucesso: ${data.arquivo}`);
+        })
+        .catch(error => {
+            alert('Erro ao exportar relatório');
+            console.error('Erro:', error);
+        });
+    });
+</script>
+{% endblock %} 
