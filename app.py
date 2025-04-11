@@ -7,6 +7,7 @@ import pandas as pd
 from openpyxl import Workbook
 import json
 import os
+from auth import USUARIOS
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_do_painel"
@@ -152,12 +153,14 @@ def relatorios():
 @app.route("/meu_perfil")
 @login_required
 def meu_perfil():
-    return render_template("configuracoes/meu_perfil.html")
+    usuario_logado = session.get("usuario")
+    dados_usuario = USUARIOS.get(usuario_logado, {})
+    return render_template("configuracoes/meu_perfil.html", usuario=usuario_logado, dados=dados_usuario)
 
 @app.route("/usuarios")
 @login_required
 def usuarios():
-    return render_template("configuracoes/usuarios.html")
+    return render_template("configuracoes/usuarios.html", usuarios=USUARIOS)
 
 # 📥 Exportar para Excel
 @app.route("/exportar", methods=["POST"])

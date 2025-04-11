@@ -1,0 +1,24 @@
+{% extends "menu.html" %}
+
+{% block title %}Meu Perfil{% endblock %}
+{% block header %}Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="perfil" style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; color: black;">
+    <div class="campo" style="margin-bottom: 15px;">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" value="{{ dados.nome }}" disabled style="width: 100%; padding: 8px;">
+    </div>
+    <div class="campo" style="margin-bottom: 15px;">
+        <label for="usuario">Usuário</label>
+        <input type="text" id="usuario" value="{{ usuario }}" disabled style="width: 100%; padding: 8px;">
+    </div>
+    <div class="campo" style="margin-bottom: 15px;">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" value="{{ dados.senha }}" disabled style="width: 100%; padding: 8px;">
+    </div>
+    <button style="padding: 10px 15px; background-color: #2196F3; color: white; border: none; border-radius: 4px;">
+        Alterar Senha
+    </button>
+</div>
+{% endblock %}

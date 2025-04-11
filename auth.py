@@ -3,10 +3,10 @@ from functools import wraps
 
 # Dicionário com os usuários da equipe de TI
 USUARIOS = {
-    "ti1": {"senha": "ti123", "nome": "Técnico 1"},
-    "ti2": {"senha": "ti123", "nome": "Técnico 2"},
-    "ti3": {"senha": "ti123", "nome": "Técnico 3"},
-    "ti4": {"senha": "ti123", "nome": "Técnico 4"},
+    "ti1": {"senha": "ti123", "nome": "Christian Lucas"},
+    "ti2": {"senha": "ti123", "nome": "Edson Farias"},
+    "ti3": {"senha": "ti123", "nome": "Lucas Gabriel"},
+    "ti4": {"senha": "ti123", "nome": "Brenan Araújo"},
     "ti5": {"senha": "ti123", "nome": "Técnico 5"},
     "ti6": {"senha": "ti123", "nome": "Técnico 6"}
 }
