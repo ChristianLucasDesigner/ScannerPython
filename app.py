@@ -97,16 +97,6 @@ def scan():
     try:
         resultados = escanear_rede(base_ip)
         
-        # Classificar resultados
-        maquinas = [r for r in resultados if r["hostname"].startswith("Pc")]
-        impressoras = [r for r in resultados if r["hostname"].startswith("IMP")]
-        aparelhos = [r for r in resultados if r["hostname"].startswith("CEL")]
-        outros = [r for r in resultados if not any([
-            r["hostname"].startswith("Pc"),
-            r["hostname"].startswith("IMP"),
-            r["hostname"].startswith("CEL")
-        ])]
-        
         # Registrar no histórico
         historico.append({
             "data": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -121,34 +111,20 @@ def scan():
         
         return jsonify({
             "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-            "maquinas": maquinas,
-            "impressoras": impressoras,
-            "aparelhos": aparelhos,
-            "outros": outros
+            "dispositivos": resultados
         })
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-
-# 📊 Rotas de visualização
-@app.route("/maquinas")
-@login_required
-def maquinas():
-    return render_template("acessos/maquinas.html")
-
-@app.route("/impressoras")
-@login_required
-def impressoras():
-    return render_template("acessos/impressoras.html")
-
-@app.route("/aparelhos")
-@login_required
-def aparelhos():
-    return render_template("acessos/aparelhos.html")
 
 @app.route("/relatorios")
 @login_required
 def relatorios():
     return render_template("dashboard/relatorios.html", historico=historico)
+
+@app.route("/ips")
+@login_required
+def ips():
+    return render_template("ips.html")
 
 @app.route("/meu_perfil")
 @login_required
@@ -178,10 +154,8 @@ def exportar():
         ws.append(["IP", "Hostname", "Status"])
         
         # Dados
-        for categoria in ["maquinas", "impressoras", "aparelhos", "outros"]:
-            if categoria in dados:
-                for item in dados[categoria]:
-                    ws.append([item["ip"], item["hostname"], item["status"]])
+        for item in dados.get("dispositivos", []):
+            ws.append([item["ip"], item["hostname"], item["status"]])
         
         # Salvar arquivo
         nome_arquivo = f"relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"

@@ -4,27 +4,812 @@
 {% block header %}Relatórios de Varredura{% endblock %}
 
 {% block content %}
-<div style="background: white; padding: 20px; border-radius: 8px; color: black;">
-    <h3>Últimas varreduras</h3>
-    <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
-        <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th style="padding: 10px;">Data</th>
-                <th style="padding: 10px;">Usuário</th>
-                <th style="padding: 10px;">Tipo</th>
-                <th style="padding: 10px;">Resultados</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in historico %}
-            <tr>
-                <td style="padding: 10px;">{{ item.data }}</td>
-                <td style="padding: 10px;">{{ item.usuario }}</td>
-                <td style="padding: 10px;">{{ item.tipo }}</td>
-                <td style="padding: 10px;">{{ item.resultados }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="reports-container">
+    <div class="header-actions">
+        <button id="delete-all-btn" class="delete-all-btn">
+            <i class="fas fa-trash-alt"></i>
+            Deletar Todos os Registros
+        </button>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-group">
+            <label for="date-filter">Data:</label>
+            <input type="date" id="date-filter" class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+            <label for="user-filter">Usuário:</label>
+            <select id="user-filter" class="filter-input">
+                <option value="">Todos</option>
+                {% for item in historico|map(attribute='usuario')|unique %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="type-filter">Tipo:</label>
+            <select id="type-filter" class="filter-input">
+                <option value="">Todos</option>
+                <option value="Manual">Manual</option>
+                <option value="Automático">Automático</option>
+            </select>
+        </div>
+        
+        <button id="clear-filters" class="clear-btn">
+            <i class="fas fa-times"></i>
+            Limpar Filtros
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table id="reports-table">
+            <thead>
+                <tr>
+                    <th data-sort="data" class="sortable">
+                        Data
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="usuario" class="sortable">
+                        Usuário
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="tipo" class="sortable">
+                        Tipo
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="resultados" class="sortable">
+                        Resultados
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in historico %}
+                <tr>
+                    <td data-value="{{ item.data }}">{{ item.data }}</td>
+                    <td data-value="{{ item.usuario }}">{{ item.usuario }}</td>
+                    <td data-value="{{ item.tipo }}">{{ item.tipo }}</td>
+                    <td data-value="{{ item.resultados }}">{{ item.resultados }}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn view-btn" title="Visualizar">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn delete-btn" title="Deletar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<style>
+    .reports-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-all-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .delete-all-btn:hover {
+        background: #dc2626;
+    }
+
+    .delete-all-btn i {
+        font-size: 1rem;
+    }
+
+    .filters-section {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .filter-input {
+        padding: 0.5rem;
+        border: 2px solid #334155;
+        border-radius: 0.5rem;
+        background: #0f172a;
+        color: var(--text-light);
+        min-width: 150px;
+    }
+
+    .clear-btn {
+        background: #334155;
+        color: var(--text-light);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: auto;
+    }
+
+    .clear-btn:hover {
+        background: #475569;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    #reports-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #reports-table th {
+        background: #0f172a;
+        padding: 1rem;
+        text-align: left;
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+
+    #reports-table th.sortable {
+        padding-right: 2rem;
+    }
+
+    #reports-table th i {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    #reports-table th.asc i.fa-sort-up {
+        color: var(--primary);
+    }
+
+    #reports-table th.desc i.fa-sort-down {
+        color: var(--primary);
+    }
+
+    #reports-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    #reports-table tr:hover {
+        background: rgba(124, 58, 237, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .filters-section {
+            flex-direction: column;
+        }
+
+        .filter-input {
+            width: 100%;
+        }
+
+        .clear-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .actions-cell {
+        text-align: center;
+        padding: 0.5rem !important;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.25rem;
+        transition: all 0.2s ease;
+        margin: 0 0.25rem;
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+    }
+
+    .view-btn {
+        color: var(--primary);
+    }
+
+    .view-btn:hover {
+        background: rgba(124, 58, 237, 0.1);
+    }
+
+    .delete-btn {
+        color: #ef4444;
+    }
+
+    .delete-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: var(--bg-card);
+        margin: 10% auto;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+
+    .close-modal:hover {
+        color: var(--text-light);
+    }
+
+    .modal-title {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    .modal-body {
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .confirm-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+
+    .confirm-btn:hover {
+        background: #dc2626;
+    }
+
+    .cancel-btn {
+        background: #334155;
+        color: var(--text-light);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+
+    .cancel-btn:hover {
+        background: #475569;
+    }
+
+    .view-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .view-modal-content {
+        background: var(--bg-card);
+        margin: 5% auto;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .view-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    .view-modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .view-modal-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1.5rem;
+        padding: 0.5rem;
+    }
+
+    .view-modal-close:hover {
+        color: var(--text-light);
+    }
+
+    .view-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .view-modal-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .view-modal-section-title {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--primary);
+    }
+
+    .view-modal-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .view-modal-info-item {
+        background: #0f172a;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+
+    .view-modal-info-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .view-modal-info-value {
+        font-size: 1rem;
+        color: var(--text-light);
+    }
+
+    .view-modal-devices {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .view-modal-device {
+        background: #0f172a;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .view-modal-device-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .view-modal-device-ip {
+        font-weight: 500;
+        color: var(--text-light);
+    }
+
+    .view-modal-device-hostname {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .view-modal-device-status {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        background: #10b981;
+        color: white;
+    }
+
+    .view-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #334155;
+    }
+
+    .view-modal-export {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-modal-export:hover {
+        background: var(--primary-dark);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById('reports-table');
+        const filters = {
+            date: document.getElementById('date-filter'),
+            user: document.getElementById('user-filter'),
+            type: document.getElementById('type-filter')
+        };
+        const clearBtn = document.getElementById('clear-filters');
+        let currentSort = {
+            column: 'data',
+            direction: 'desc'
+        };
+
+        // Função para ordenar a tabela
+        function sortTable(column, direction) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const aValue = a.querySelector(`td[data-value]`).getAttribute('data-value');
+                const bValue = b.querySelector(`td[data-value]`).getAttribute('data-value');
+                
+                if (column === 'data') {
+                    return direction === 'asc' 
+                        ? new Date(aValue) - new Date(bValue)
+                        : new Date(bValue) - new Date(aValue);
+                } else if (column === 'resultados') {
+                    return direction === 'asc'
+                        ? parseInt(aValue) - parseInt(bValue)
+                        : parseInt(bValue) - parseInt(aValue);
+                } else {
+                    return direction === 'asc'
+                        ? aValue.localeCompare(bValue)
+                        : bValue.localeCompare(aValue);
+                }
+            });
+            
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Adicionar eventos de clique nos cabeçalhos
+        table.querySelectorAll('th.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+                
+                // Atualizar ícones
+                table.querySelectorAll('th i').forEach(icon => {
+                    icon.className = 'fas fa-sort';
+                });
+                
+                header.querySelector('i').className = `fas fa-sort-${direction === 'asc' ? 'up' : 'down'}`;
+                
+                // Ordenar tabela
+                sortTable(column, direction);
+                currentSort = { column, direction };
+            });
+        });
+
+        // Função para filtrar a tabela
+        function filterTable() {
+            const dateFilter = filters.date.value;
+            const userFilter = filters.user.value;
+            const typeFilter = filters.type.value;
+            
+            table.querySelectorAll('tbody tr').forEach(row => {
+                const date = row.querySelector('td[data-value]').getAttribute('data-value');
+                const user = row.querySelector('td:nth-child(2)').getAttribute('data-value');
+                const type = row.querySelector('td:nth-child(3)').getAttribute('data-value');
+                
+                const dateMatch = !dateFilter || date.includes(dateFilter);
+                const userMatch = !userFilter || user === userFilter;
+                const typeMatch = !typeFilter || type === typeFilter;
+                
+                row.style.display = dateMatch && userMatch && typeMatch ? '' : 'none';
+            });
+        }
+
+        // Adicionar eventos de filtro
+        Object.values(filters).forEach(filter => {
+            filter.addEventListener('change', filterTable);
+        });
+
+        // Limpar filtros
+        clearBtn.addEventListener('click', () => {
+            Object.values(filters).forEach(filter => {
+                filter.value = '';
+            });
+            filterTable();
+        });
+
+        // Ordenar inicialmente por data (mais recente primeiro)
+        sortTable('data', 'desc');
+
+        // Adicionar modal de confirmação
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <h3 class="modal-title">Confirmar Exclusão</h3>
+                <div class="modal-body">
+                    Tem certeza que deseja excluir este registro?
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn">Cancelar</button>
+                    <button class="confirm-btn">Confirmar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Função para mostrar o modal
+        function showModal() {
+            modal.style.display = 'block';
+        }
+
+        // Função para esconder o modal
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        // Eventos do modal
+        modal.querySelector('.close-modal').addEventListener('click', hideModal);
+        modal.querySelector('.cancel-btn').addEventListener('click', hideModal);
+
+        // Adicionar modal de visualização
+        const viewModal = document.createElement('div');
+        viewModal.className = 'view-modal';
+        viewModal.innerHTML = `
+            <div class="view-modal-content">
+                <div class="view-modal-header">
+                    <h3 class="view-modal-title">Detalhes do Scan</h3>
+                    <button class="view-modal-close">&times;</button>
+                </div>
+                <div class="view-modal-body">
+                    <div class="view-modal-section">
+                        <h4 class="view-modal-section-title">Informações Gerais</h4>
+                        <div class="view-modal-info">
+                            <div class="view-modal-info-item">
+                                <div class="view-modal-info-label">Data</div>
+                                <div class="view-modal-info-value" id="view-date"></div>
+                            </div>
+                            <div class="view-modal-info-item">
+                                <div class="view-modal-info-label">Usuário</div>
+                                <div class="view-modal-info-value" id="view-user"></div>
+                            </div>
+                            <div class="view-modal-info-item">
+                                <div class="view-modal-info-label">Tipo</div>
+                                <div class="view-modal-info-value" id="view-type"></div>
+                            </div>
+                            <div class="view-modal-info-item">
+                                <div class="view-modal-info-label">Total de Dispositivos</div>
+                                <div class="view-modal-info-value" id="view-total"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="view-modal-section">
+                        <h4 class="view-modal-section-title">Dispositivos Encontrados</h4>
+                        <div class="view-modal-devices" id="view-devices"></div>
+                    </div>
+                </div>
+                <div class="view-modal-footer">
+                    <button class="view-modal-export">
+                        <i class="fas fa-file-excel"></i>
+                        Exportar para Excel
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(viewModal);
+
+        // Funções para controlar o modal de visualização
+        function showViewModal(data) {
+            // Preencher informações gerais
+            document.getElementById('view-date').textContent = data.data;
+            document.getElementById('view-user').textContent = data.usuario;
+            document.getElementById('view-type').textContent = data.tipo;
+            document.getElementById('view-total').textContent = data.resultados;
+
+            // Preencher lista de dispositivos
+            const devicesContainer = document.getElementById('view-devices');
+            devicesContainer.innerHTML = '';
+
+            // Aqui você deve substituir por seus dados reais de dispositivos
+            // Este é apenas um exemplo
+            for (let i = 0; i < data.resultados; i++) {
+                const device = document.createElement('div');
+                device.className = 'view-modal-device';
+                device.innerHTML = `
+                    <div class="view-modal-device-info">
+                        <div class="view-modal-device-ip">192.168.1.${i + 1}</div>
+                        <div class="view-modal-device-hostname">Dispositivo ${i + 1}</div>
+                    </div>
+                    <div class="view-modal-device-status">Ativo</div>
+                `;
+                devicesContainer.appendChild(device);
+            }
+
+            viewModal.style.display = 'block';
+        }
+
+        function hideViewModal() {
+            viewModal.style.display = 'none';
+        }
+
+        // Eventos do modal de visualização
+        viewModal.querySelector('.view-modal-close').addEventListener('click', hideViewModal);
+        viewModal.querySelector('.view-modal-export').addEventListener('click', function() {
+            // Implementar exportação para Excel
+            alert('Exportando para Excel...');
+        });
+
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', function(event) {
+            if (event.target === viewModal) {
+                hideViewModal();
+            }
+        });
+
+        // Atualizar eventos dos botões de visualização
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const data = {
+                    data: row.querySelector('td[data-value]').getAttribute('data-value'),
+                    usuario: row.querySelector('td:nth-child(2)').getAttribute('data-value'),
+                    tipo: row.querySelector('td:nth-child(3)').getAttribute('data-value'),
+                    resultados: row.querySelector('td:nth-child(4)').getAttribute('data-value')
+                };
+                showViewModal(data);
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                showModal();
+                
+                // Configurar o botão de confirmar
+                modal.querySelector('.confirm-btn').onclick = function() {
+                    // Aqui você pode implementar a lógica para deletar o registro
+                    row.remove();
+                    hideModal();
+                    alert('Registro excluído com sucesso!');
+                };
+            });
+        });
+
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                hideModal();
+            }
+        });
+
+        // Adicionar modal de confirmação para deletar todos
+        const deleteAllModal = document.createElement('div');
+        deleteAllModal.className = 'modal';
+        deleteAllModal.innerHTML = `
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <h3 class="modal-title">Confirmar Exclusão</h3>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir todos os registros?</p>
+                    <p class="warning-text">Esta ação não pode ser desfeita!</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn">Cancelar</button>
+                    <button class="confirm-btn">Confirmar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(deleteAllModal);
+
+        // Funções para controlar o modal de deletar todos
+        function showDeleteAllModal() {
+            deleteAllModal.style.display = 'block';
+        }
+
+        function hideDeleteAllModal() {
+            deleteAllModal.style.display = 'none';
+        }
+
+        // Eventos do modal de deletar todos
+        deleteAllModal.querySelector('.close-modal').addEventListener('click', hideDeleteAllModal);
+        deleteAllModal.querySelector('.cancel-btn').addEventListener('click', hideDeleteAllModal);
+
+        // Evento do botão de deletar todos
+        document.getElementById('delete-all-btn').addEventListener('click', showDeleteAllModal);
+
+        // Configurar o botão de confirmar do modal de deletar todos
+        deleteAllModal.querySelector('.confirm-btn').addEventListener('click', function() {
+            // Aqui você pode implementar a lógica para deletar todos os registros
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            hideDeleteAllModal();
+            alert('Todos os registros foram excluídos com sucesso!');
+        });
+
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', function(event) {
+            if (event.target === deleteAllModal) {
+                hideDeleteAllModal();
+            }
+        });
+    });
+</script>
 {% endblock %}

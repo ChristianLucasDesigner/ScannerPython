@@ -4,21 +4,286 @@
 {% block header %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="perfil" style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; color: black;">
-    <div class="campo" style="margin-bottom: 15px;">
+<div class="perfil">
+    <div class="form-group">
         <label for="nome">Nome</label>
-        <input type="text" id="nome" value="{{ dados.nome }}" disabled style="width: 100%; padding: 8px;">
+        <input type="text" id="nome" value="{{ dados.nome }}" disabled>
     </div>
-    <div class="campo" style="margin-bottom: 15px;">
+    <div class="form-group">
         <label for="usuario">Usuário</label>
-        <input type="text" id="usuario" value="{{ usuario }}" disabled style="width: 100%; padding: 8px;">
+        <input type="text" id="usuario" value="{{ usuario }}" disabled>
     </div>
-    <div class="campo" style="margin-bottom: 15px;">
+    <div class="form-group">
+        <label for="tipo">Tipo</label>
+        <input type="text" id="tipo" value="{{ dados.tipo }}" disabled>
+    </div>
+    <div class="form-group">
         <label for="senha">Senha</label>
-        <input type="password" id="senha" value="{{ dados.senha }}" disabled style="width: 100%; padding: 8px;">
+        <input type="password" id="senha" value="{{ dados.senha }}" disabled>
     </div>
-    <button style="padding: 10px 15px; background-color: #2196F3; color: white; border: none; border-radius: 4px;">
+    <button class="action-btn" onclick="openChangePasswordModal()">
+        <i class="fas fa-key"></i>
         Alterar Senha
     </button>
 </div>
+
+<!-- Modal de Alteração de Senha -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Alterar Senha</h3>
+            <button class="close-btn" onclick="closeChangePasswordModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="change-password-form" class="modal-form">
+                <div class="form-group">
+                    <label for="current-password">Senha Atual:</label>
+                    <input type="password" id="current-password" name="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Nova Senha:</label>
+                    <input type="password" id="new-password" name="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Nova Senha:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeChangePasswordModal()">Cancelar</button>
+                    <button type="submit" class="save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .perfil {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .form-group input {
+        padding: 0.75rem;
+        border: 2px solid #334155;
+        border-radius: 0.5rem;
+        background: #0f172a;
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    .form-group input:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .action-btn {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background: #2563eb;
+    }
+
+    .action-btn i {
+        font-size: 1rem;
+    }
+
+    /* Estilos do Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: var(--bg-card);
+        margin: 10% auto;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-header h3 {
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .cancel-btn {
+        background: #334155;
+        color: var(--text-light);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .cancel-btn:hover {
+        background: #475569;
+    }
+
+    .save-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .save-btn:hover {
+        background: #059669;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            margin: 5% auto;
+            width: 95%;
+        }
+    }
+</style>
+
+<script>
+    function openChangePasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'block';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'none';
+        document.getElementById('change-password-form').reset();
+    }
+
+    // Evento do formulário de alteração de senha
+    document.getElementById('change-password-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        // Validações
+        if (newPassword !== confirmPassword) {
+            alert('As senhas não coincidem!');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            alert('A senha deve ter pelo menos 6 caracteres!');
+            return;
+        }
+        
+        // Aqui você deve implementar a lógica para alterar a senha
+        // Enviar os dados para o backend via AJAX
+        fetch('/alterar_senha', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Senha alterada com sucesso!');
+                closeChangePasswordModal();
+            } else {
+                alert(data.message || 'Erro ao alterar senha!');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao alterar senha!');
+        });
+    });
+
+    // Fechar modal ao clicar fora
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('change-password-modal');
+        if (e.target === modal) {
+            closeChangePasswordModal();
+        }
+    });
+</script>
 {% endblock %}

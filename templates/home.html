@@ -9,15 +9,33 @@
 <div class="dashboard">
     <div class="scan-card">
         <h3><i class="fas fa-search"></i> Escanear Rede</h3>
-        <form id="scan-form">
+        <form id="scan-form" class="scan-form">
             <div class="input-group">
                 <input type="text" id="base_ip" placeholder="Digite o IP base (ex: 192.168.1)" required>
-                <button type="submit">
+                <button type="submit" id="scan-button">
                     <i class="fas fa-search"></i>
-                    Escanear
+                    Iniciar Scan
+                </button>
+                <button type="button" id="stop-button" class="stop-button" disabled>
+                    <i class="fas fa-stop"></i>
+                    Parar Scan
+                </button>
+                <button type="button" id="schedule-button" class="schedule-button">
+                    <i class="fas fa-clock"></i>
+                    Agendar Scan
                 </button>
             </div>
         </form>
+        
+        <div class="scan-animation" id="scan-animation" style="display: none;">
+            <div class="scan-line"></div>
+            <div class="scan-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="scan-text">Escaneando rede...</div>
+        </div>
         
         <div class="schedule-options">
             <h4>Agendamento Automático</h4>
@@ -27,6 +45,17 @@
                 <button class="schedule-btn" data-interval="360">6 horas</button>
                 <button class="schedule-btn" data-interval="1440">24 horas</button>
             </div>
+        </div>
+    </div>
+
+    <div class="scan-status">
+        <div id="countdown" class="countdown" style="display: none;">
+            <span class="countdown-label">Próximo scan em:</span>
+            <span class="countdown-timer">00:00:00</span>
+            <button id="cancel-schedule" class="cancel-schedule">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
         </div>
     </div>
 
@@ -41,23 +70,8 @@
 
         <div class="results-grid">
             <div class="result-card">
-                <h4><i class="fas fa-desktop"></i> Máquinas</h4>
-                <div class="result-list" id="maquinas-list"></div>
-            </div>
-
-            <div class="result-card">
-                <h4><i class="fas fa-print"></i> Impressoras</h4>
-                <div class="result-list" id="impressoras-list"></div>
-            </div>
-
-            <div class="result-card">
-                <h4><i class="fas fa-mobile-alt"></i> Aparelhos</h4>
-                <div class="result-list" id="aparelhos-list"></div>
-            </div>
-
-            <div class="result-card">
-                <h4><i class="fas fa-question-circle"></i> Outros</h4>
-                <div class="result-list" id="outros-list"></div>
+                <h4><i class="fas fa-network-wired"></i> Dispositivos</h4>
+                <div class="result-list" id="dispositivos-list"></div>
             </div>
         </div>
     </div>
@@ -111,7 +125,7 @@
     .input-group {
         display: flex;
         gap: 1rem;
-        margin-bottom: 1.5rem;
+        align-items: center;
     }
 
     input[type="text"] {
@@ -265,90 +279,311 @@
             flex-direction: column;
         }
     }
+
+    .scan-animation {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #0f172a;
+        border-radius: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary);
+        animation: scan 2s linear infinite;
+    }
+
+    .scan-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .scan-text {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    @keyframes scan {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.5;
+        }
+    }
+
+    .stop-button {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .stop-button:hover:not(:disabled) {
+        background: #dc2626;
+    }
+
+    .stop-button:disabled {
+        background: #475569;
+        cursor: not-allowed;
+    }
+
+    .schedule-button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .schedule-button:hover {
+        background: #2563eb;
+    }
+
+    .scan-status {
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+
+    .countdown {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .countdown-label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .countdown-timer {
+        color: var(--primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+        font-family: monospace;
+    }
+
+    .cancel-schedule {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        margin-left: auto;
+    }
+
+    .cancel-schedule:hover {
+        background: #dc2626;
+    }
 </style>
 
 <script>
-    $('#scan-form').on('submit', function(e) {
-        e.preventDefault();
-        const base_ip = $('#base_ip').val();
-        
-        $('#loading').fadeIn();
-        $('#resultados').hide();
-        
-        fetch('/scan', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ base_ip: base_ip })
-        })
-        .then(response => response.json())
-        .then(data => {
-            $('#loading').fadeOut();
-            $('#resultados').fadeIn();
-            
-            // Atualizar listas
-            updateList('maquinas-list', data.maquinas);
-            updateList('impressoras-list', data.impressoras);
-            updateList('aparelhos-list', data.aparelhos);
-            updateList('outros-list', data.outros);
-        })
-        .catch(error => {
-            $('#loading').fadeOut();
-            alert('Erro ao escanear a rede. Por favor, tente novamente.');
-            console.error('Erro:', error);
+    document.addEventListener('DOMContentLoaded', function() {
+        const scanForm = document.getElementById('scan-form');
+        const scanButton = document.getElementById('scan-button');
+        const stopButton = document.getElementById('stop-button');
+        const scheduleButton = document.getElementById('schedule-button');
+        const scanAnimation = document.getElementById('scan-animation');
+        const countdown = document.getElementById('countdown');
+        const countdownTimer = countdown.querySelector('.countdown-timer');
+        let scanInterval;
+        let countdownInterval;
+        let currentSchedule = null;
+
+        // Função para formatar o tempo
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Função para verificar se já existe um agendamento
+        function hasActiveSchedule() {
+            return currentSchedule !== null;
+        }
+
+        // Função para cancelar o agendamento atual
+        function cancelSchedule() {
+            if (currentSchedule) {
+                clearInterval(currentSchedule);
+                currentSchedule = null;
+                countdown.style.display = 'none';
+                // Aqui você deve implementar a lógica para cancelar o agendamento no backend
+                alert('Agendamento cancelado com sucesso!');
+            }
+        }
+
+        // Função para iniciar a contagem regressiva
+        function startCountdown(seconds) {
+            if (hasActiveSchedule()) {
+                alert('Já existe um agendamento em andamento. Cancele o atual para criar um novo.');
+                return;
+            }
+
+            let remainingSeconds = seconds;
+            countdown.style.display = 'flex';
+            countdownTimer.textContent = formatTime(remainingSeconds);
+
+            currentSchedule = setInterval(() => {
+                remainingSeconds--;
+                countdownTimer.textContent = formatTime(remainingSeconds);
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(currentSchedule);
+                    currentSchedule = null;
+                    countdown.style.display = 'none';
+                    // Iniciar o scan automaticamente
+                    startScan();
+                }
+            }, 1000);
+        }
+
+        // Função para parar o scan
+        function stopScan() {
+            clearInterval(scanInterval);
+            scanAnimation.style.display = 'none';
+            scanButton.disabled = false;
+            stopButton.disabled = true;
+            // Aqui você deve implementar a lógica para parar o scan no backend
+        }
+
+        // Função para iniciar o scan
+        function startScan() {
+            scanAnimation.style.display = 'block';
+            scanButton.disabled = true;
+            stopButton.disabled = false;
+            // Aqui você deve implementar a lógica para iniciar o scan no backend
+        }
+
+        // Evento do formulário de scan
+        scanForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            startScan();
         });
-    });
 
-    function updateList(elementId, items) {
-        const list = $(`#${elementId}`);
-        list.empty();
-        
-        items.forEach(item => {
-            list.append(`
-                <div class="result-item">
-                    <div>${item.ip}</div>
-                    <small>${item.hostname}</small>
-                </div>
-            `);
+        // Evento do botão de parar
+        stopButton.addEventListener('click', stopScan);
+
+        // Evento do botão de cancelar agendamento
+        document.getElementById('cancel-schedule').addEventListener('click', cancelSchedule);
+
+        // Evento do botão de agendar
+        scheduleButton.addEventListener('click', function() {
+            if (hasActiveSchedule()) {
+                alert('Já existe um agendamento em andamento. Cancele o atual para criar um novo.');
+                return;
+            }
+
+            const minutes = prompt('Digite o intervalo em minutos para o scan automático:');
+            if (minutes && !isNaN(minutes) && minutes > 0) {
+                const seconds = minutes * 60;
+                startCountdown(seconds);
+            } else {
+                alert('Por favor, digite um número válido de minutos.');
+            }
         });
-    }
 
-    $('#export-btn').on('click', function() {
-        const dados = {
-            maquinas: getItemsFromList('maquinas-list'),
-            impressoras: getItemsFromList('impressoras-list'),
-            aparelhos: getItemsFromList('aparelhos-list'),
-            outros: getItemsFromList('outros-list')
-        };
+        // Exportar para Excel
+        document.getElementById('export-btn').addEventListener('click', function() {
+            const dispositivos = Array.from(document.querySelectorAll('.result-item')).map(item => ({
+                ip: item.querySelector('div').textContent,
+                hostname: item.querySelector('small').textContent,
+                status: 'ativo'
+            }));
 
-        fetch('/exportar', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(dados)
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(`Relatório exportado com sucesso: ${data.arquivo}`);
-        })
-        .catch(error => {
-            alert('Erro ao exportar relatório.');
-            console.error('Erro:', error);
+            fetch('/exportar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dispositivos: dispositivos })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.erro) {
+                    alert(data.erro);
+                    return;
+                }
+                alert(`Relatório exportado como ${data.arquivo}`);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao exportar relatório');
+            });
         });
-    });
 
-    function getItemsFromList(listId) {
-        return $(`#${listId} .result-item`).map(function() {
-            return {
-                ip: $(this).find('div').text(),
-                hostname: $(this).find('small').text(),
-                status: 'Ativo'
-            };
-        }).get();
-    }
+        // Agendamento automático com botões pré-definidos
+        document.querySelectorAll('.schedule-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (hasActiveSchedule()) {
+                    alert('Já existe um agendamento em andamento. Cancele o atual para criar um novo.');
+                    return;
+                }
 
-    $('.schedule-btn').on('click', function() {
-        const interval = $(this).data('interval');
-        // Implementar lógica de agendamento aqui
-        alert(`Agendamento configurado para ${interval} minutos`);
+                const interval = parseInt(this.dataset.interval);
+                const seconds = interval * 60;
+                startCountdown(seconds);
+            });
+        });
     });
 </script>
 {% endblock %} 

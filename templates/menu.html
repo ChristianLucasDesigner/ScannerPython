@@ -164,24 +164,14 @@
                 <span>Home</span>
             </a>
             
-            <a href="{{ url_for('maquinas') }}" class="menu-item {% if request.endpoint == 'maquinas' %}active{% endif %}">
-                <i class="fas fa-desktop"></i>
-                <span>Máquinas</span>
-            </a>
-            
-            <a href="{{ url_for('impressoras') }}" class="menu-item {% if request.endpoint == 'impressoras' %}active{% endif %}">
-                <i class="fas fa-print"></i>
-                <span>Impressoras</span>
-            </a>
-            
-            <a href="{{ url_for('aparelhos') }}" class="menu-item {% if request.endpoint == 'aparelhos' %}active{% endif %}">
-                <i class="fas fa-mobile-alt"></i>
-                <span>Aparelhos</span>
-            </a>
-            
             <a href="{{ url_for('relatorios') }}" class="menu-item {% if request.endpoint == 'relatorios' %}active{% endif %}">
-                <i class="fas fa-chart-bar"></i>
+                <i class="fas fa-file-alt"></i>
                 <span>Relatórios</span>
+            </a>
+            
+            <a href="{{ url_for('ips') }}" class="menu-item {% if request.endpoint == 'ips' %}active{% endif %}">
+                <i class="fas fa-network-wired"></i>
+                <span>IPs cadastrados</span>
             </a>
             
             <a href="{{ url_for('meu_perfil') }}" class="menu-item {% if request.endpoint == 'meu_perfil' %}active{% endif %}">

@@ -4,36 +4,562 @@
 {% block header %}Gerenciamento de Usuários{% endblock %}
 
 {% block content %}
-<div style="background: white; border-radius: 8px; padding: 20px; color: black;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="margin: 0;">Lista de Usuários</h3>
-        <button style="background-color: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
-            + Adicionar Usuário
+<div class="users-container">
+    <div class="header-actions">
+        <button id="add-user-btn" class="add-user-btn">
+            <i class="fas fa-user-plus"></i>
+            Adicionar Usuário
         </button>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th style="padding: 12px; text-align: left;">Nome</th>
-                <th style="padding: 12px; text-align: left;">Usuário</th>
-                <th style="padding: 12px; text-align: left;">Tipo</th>
-                <th style="padding: 12px; text-align: left;">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario, dados in usuarios.items() %}
-            <tr>
-                <td style="padding: 10px;">{{ dados.nome }}</td>
-                <td style="padding: 10px;">{{ usuario }}</td>
-                <td style="padding: 10px;">Técnico</td>
-                <td style="padding: 10px;">
-                    <button style="background-color: #2196F3; color: white; border: none; padding: 6px 10px; border-radius: 4px;">Editar</button>
-                    <button style="background-color: #f44336; color: white; border: none; padding: 6px 10px; border-radius: 4px;">Remover</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table id="users-table">
+            <thead>
+                <tr>
+                    <th data-sort="nome" class="sortable">
+                        Nome
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="usuario" class="sortable">
+                        Usuário
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="tipo" class="sortable">
+                        Tipo
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario, dados in usuarios.items() %}
+                <tr data-usuario="{{ usuario }}">
+                    <td data-value="{{ dados.nome }}">{{ dados.nome }}</td>
+                    <td data-value="{{ usuario }}">{{ usuario }}</td>
+                    <td data-value="{{ dados.tipo }}">{{ dados.tipo }}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit-btn" title="Editar" onclick="openEditModal('{{ usuario }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" title="Excluir" onclick="openDeleteModal('{{ usuario }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- Modal de Edição -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Usuário</h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="edit-form" class="modal-form">
+                <div class="form-group">
+                    <label for="edit-nome">Nome:</label>
+                    <input type="text" id="edit-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-usuario">Usuário:</label>
+                    <input type="text" id="edit-usuario" name="usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-tipo">Tipo:</label>
+                    <select id="edit-tipo" name="tipo" required>
+                        <option value="admin">Administrador</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="usuario">Usuário</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-senha">Nova Senha:</label>
+                    <input type="password" id="edit-senha" name="senha" placeholder="Deixe em branco para manter a senha atual">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="save-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Deleção -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Excluir Usuário</h3>
+            <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="delete-btn" onclick="confirmDelete()">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Adição -->
+<div id="add-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Adicionar Usuário</h3>
+            <button class="close-btn" onclick="closeAddModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-form" class="modal-form">
+                <div class="form-group">
+                    <label for="add-nome">Nome:</label>
+                    <input type="text" id="add-nome" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-usuario">Usuário:</label>
+                    <input type="text" id="add-usuario" name="usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-senha">Senha:</label>
+                    <input type="password" id="add-senha" name="senha" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-tipo">Tipo:</label>
+                    <select id="add-tipo" name="tipo" required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="admin">Administrador</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="usuario">Usuário</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeAddModal()">Cancelar</button>
+                    <button type="submit" class="save-btn">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .users-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1.5rem;
+    }
+
+    .add-user-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .add-user-btn:hover {
+        background: #059669;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        background: #0f172a;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #334155;
+    }
+
+    th {
+        background: #1e293b;
+        color: var(--text-light);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    th.sortable:hover {
+        background: #334155;
+    }
+
+    th i {
+        margin-left: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    td {
+        color: var(--text-muted);
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: none;
+        color: white;
+    }
+
+    .edit-btn {
+        background: #3b82f6;
+    }
+
+    .edit-btn:hover {
+        background: #2563eb;
+    }
+
+    .delete-btn {
+        background: #ef4444;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+    }
+
+    /* Estilos do Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: var(--bg-card);
+        margin: 10% auto;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-header h3 {
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 2px solid #334155;
+        border-radius: 0.5rem;
+        background: #0f172a;
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .cancel-btn {
+        background: #334155;
+        color: var(--text-light);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .cancel-btn:hover {
+        background: #475569;
+    }
+
+    .save-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .save-btn:hover {
+        background: #059669;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            margin: 5% auto;
+            width: 95%;
+        }
+    }
+</style>
+
+<script>
+    let currentUser = null;
+
+    // Função para verificar se um nome ou usuário já existe
+    function checkExistingUser(nome, usuario, excludeUsuario = null) {
+        const rows = document.querySelectorAll('#users-table tbody tr');
+        for (const row of rows) {
+            const rowUsuario = row.getAttribute('data-usuario');
+            // Pula a linha do usuário que está sendo editado
+            if (excludeUsuario && rowUsuario === excludeUsuario) continue;
+            
+            const rowNome = row.querySelector('td[data-value]').textContent;
+            const rowUsuarioText = row.querySelector('td[data-value="' + rowUsuario + '"]').textContent;
+            
+            if (nome.toLowerCase() === rowNome.toLowerCase()) {
+                return { exists: true, field: 'nome', value: rowNome };
+            }
+            if (usuario.toLowerCase() === rowUsuarioText.toLowerCase()) {
+                return { exists: true, field: 'usuario', value: rowUsuarioText };
+            }
+        }
+        return { exists: false };
+    }
+
+    // Função para mostrar mensagem de erro
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorDiv.style.color = '#ef4444';
+        errorDiv.style.marginTop = '0.5rem';
+        errorDiv.style.fontSize = '0.875rem';
+        
+        // Remove mensagem de erro anterior se existir
+        const existingError = document.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        document.querySelector('.modal-body').appendChild(errorDiv);
+        
+        // Remove a mensagem após 3 segundos
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 3000);
+    }
+
+    // Funções do Modal de Edição
+    function openEditModal(usuario) {
+        currentUser = usuario;
+        const modal = document.getElementById('edit-modal');
+        const row = document.querySelector(`tr[data-usuario="${usuario}"]`);
+        
+        // Preencher o formulário com os dados atuais
+        document.getElementById('edit-nome').value = row.querySelector('td[data-value]').textContent;
+        document.getElementById('edit-usuario').value = usuario;
+        document.getElementById('edit-tipo').value = row.querySelector('td[data-value="tipo"]').textContent.toLowerCase();
+        document.getElementById('edit-senha').value = '';
+        
+        modal.style.display = 'block';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+        currentUser = null;
+    }
+
+    // Funções do Modal de Deleção
+    function openDeleteModal(usuario) {
+        currentUser = usuario;
+        document.getElementById('delete-modal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').style.display = 'none';
+        currentUser = null;
+    }
+
+    function confirmDelete() {
+        if (currentUser) {
+            // Aqui você deve implementar a lógica para deletar o usuário
+            const row = document.querySelector(`tr[data-usuario="${currentUser}"]`);
+            row.remove();
+            closeDeleteModal();
+        }
+    }
+
+    // Evento do formulário de edição
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (currentUser) {
+            const nome = document.getElementById('edit-nome').value;
+            const usuario = document.getElementById('edit-usuario').value;
+            
+            // Verifica se o nome ou usuário já existe
+            const check = checkExistingUser(nome, usuario, currentUser);
+            if (check.exists) {
+                showError(`Já existe um usuário com este ${check.field}: ${check.value}`);
+                return;
+            }
+            
+            // Aqui você deve implementar a lógica para salvar as alterações
+            const row = document.querySelector(`tr[data-usuario="${currentUser}"]`);
+            row.querySelector('td[data-value]').textContent = nome;
+            row.querySelector('td[data-value="tipo"]').textContent = document.getElementById('edit-tipo').value;
+            row.setAttribute('data-usuario', usuario);
+            
+            closeEditModal();
+        }
+    });
+
+    // Funções do Modal de Adição
+    function openAddModal() {
+        document.getElementById('add-modal').style.display = 'block';
+        document.getElementById('add-form').reset();
+    }
+
+    function closeAddModal() {
+        document.getElementById('add-modal').style.display = 'none';
+    }
+
+    // Evento do botão de adicionar
+    document.getElementById('add-user-btn').addEventListener('click', openAddModal);
+
+    // Evento do formulário de adição
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nome = document.getElementById('add-nome').value;
+        const usuario = document.getElementById('add-usuario').value;
+        const tipo = document.getElementById('add-tipo').value;
+        
+        // Verifica se o nome ou usuário já existe
+        const check = checkExistingUser(nome, usuario);
+        if (check.exists) {
+            showError(`Já existe um usuário com este ${check.field}: ${check.value}`);
+            return;
+        }
+        
+        // Aqui você deve implementar a lógica para adicionar o usuário
+        const tbody = document.querySelector('#users-table tbody');
+        const newRow = document.createElement('tr');
+        newRow.setAttribute('data-usuario', usuario);
+        newRow.innerHTML = `
+            <td data-value="${nome}">${nome}</td>
+            <td data-value="${usuario}">${usuario}</td>
+            <td data-value="${tipo}">${tipo}</td>
+            <td class="actions-cell">
+                <button class="action-btn edit-btn" title="Editar" onclick="openEditModal('${usuario}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" title="Excluir" onclick="openDeleteModal('${usuario}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        tbody.appendChild(newRow);
+        closeAddModal();
+    });
+
+    // Fechar modais ao clicar fora
+    window.addEventListener('click', function(e) {
+        const editModal = document.getElementById('edit-modal');
+        const deleteModal = document.getElementById('delete-modal');
+        const addModal = document.getElementById('add-modal');
+        
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+        if (e.target === deleteModal) {
+            closeDeleteModal();
+        }
+        if (e.target === addModal) {
+            closeAddModal();
+        }
+    });
+</script>
 {% endblock %}

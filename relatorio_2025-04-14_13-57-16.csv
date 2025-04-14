@@ -1,0 +1,43 @@
+ip,hostname,status
+192.168.200.1,dpc-router-0-0,ativo
+192.168.200.3,HPB2C730,ativo
+192.168.200.4,PCCREDITO,ativo
+192.168.200.6,Hostname não encontrado,ativo
+192.168.200.8,DESKTOP-DODIM6C,ativo
+192.168.200.10,DESKTOP-84K0LSG,ativo
+192.168.200.12,DESKTOP-0PITGBM,ativo
+192.168.200.14,Hostname não encontrado,ativo
+192.168.200.15,Hostname não encontrado,ativo
+192.168.200.16,HP9C10F1,ativo
+192.168.200.17,Hostname não encontrado,ativo
+192.168.200.19,Hostname não encontrado,ativo
+192.168.200.20,BRN30055C5CB3C9,ativo
+192.168.200.22,DESKTOP-C03OJKV,ativo
+192.168.200.23,BRN3C2AF469A4B6,ativo
+192.168.200.24,Hostname não encontrado,ativo
+192.168.200.31,DESKTOP-42I2DEC,ativo
+192.168.200.32,Hostname não encontrado,ativo
+192.168.200.33,COMPRAS-DF,ativo
+192.168.200.34,COMPRASDF,ativo
+192.168.200.35,RECEPCAO,ativo
+192.168.200.36,DESKTOP-O8KIMEB,ativo
+192.168.200.37,DESKTOP-8DTOCIK,ativo
+192.168.200.38,DEPARTAMENTO-PE,ativo
+192.168.200.39,Hostname não encontrado,ativo
+192.168.200.40,Hostname não encontrado,ativo
+192.168.200.41,Hostname não encontrado,ativo
+192.168.200.44,BRAGOADM,ativo
+192.168.200.45,DESKTOP-VN5LEG5,ativo
+192.168.200.58,HP59EF28,ativo
+192.168.200.59,HP5A3159,ativo
+192.168.200.80,SEC30CDA7CC54AC,ativo
+192.168.200.85,HPE0E582,ativo
+192.168.200.95,BRN001BA9AA6CD5,ativo
+192.168.200.100,Hostname não encontrado,ativo
+192.168.200.101,Hostname não encontrado,ativo
+192.168.200.205,SERVIDOR-TS,ativo
+192.168.200.218,Hostname não encontrado,ativo
+192.168.200.220,Hostname não encontrado,ativo
+192.168.200.221,Hostname não encontrado,ativo
+192.168.200.251,dpc-router-0-1,ativo
+192.168.200.253,FIREWALL,ativo

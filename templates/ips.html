@@ -1,0 +1,314 @@
+{% extends "menu.html" %}
+
+{% block title %}IPs Cadastrados{% endblock %}
+{% block header %}Gerenciamento de IPs{% endblock %}
+
+{% block content %}
+<div class="ips-container">
+    <div class="filters-section">
+        <div class="filter-group">
+            <label for="ip-filter">IP:</label>
+            <input type="text" id="ip-filter" class="filter-input" placeholder="Filtrar por IP">
+        </div>
+        
+        <div class="filter-group">
+            <label for="nome-filter">Nome:</label>
+            <input type="text" id="nome-filter" class="filter-input" placeholder="Filtrar por nome">
+        </div>
+        
+        <div class="filter-group">
+            <label for="setor-filter">Setor:</label>
+            <select id="setor-filter" class="filter-input">
+                <option value="">Todos</option>
+                <option value="TI">TI</option>
+                <option value="RH">RH</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Comercial">Comercial</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label for="tipo-filter">Tipo:</label>
+            <select id="tipo-filter" class="filter-input">
+                <option value="">Todos</option>
+                <option value="computador">Computador</option>
+                <option value="impressora">Impressora</option>
+                <option value="aparelho">Aparelho</option>
+            </select>
+        </div>
+        
+        <button id="clear-filters" class="clear-btn">
+            <i class="fas fa-times"></i>
+            Limpar Filtros
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table id="ips-table">
+            <thead>
+                <tr>
+                    <th data-sort="ip" class="sortable">
+                        IP
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="nome" class="sortable">
+                        Nome
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="setor" class="sortable">
+                        Setor
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th data-sort="tipo" class="sortable">
+                        Tipo
+                        <i class="fas fa-sort"></i>
+                    </th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="ip-list-body">
+                <!-- Lista de IPs será preenchida dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .ips-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .filters-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #0f172a;
+        border-radius: 0.5rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 200px;
+        flex: 1;
+    }
+
+    .filter-group label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .filter-input {
+        padding: 0.5rem;
+        border: 2px solid #334155;
+        border-radius: 0.5rem;
+        background: #0f172a;
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .clear-btn {
+        background: #334155;
+        color: var(--text-light);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        align-self: flex-end;
+    }
+
+    .clear-btn:hover {
+        background: #475569;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        background: #0f172a;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #334155;
+    }
+
+    th {
+        background: #1e293b;
+        color: var(--text-light);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    th.sortable:hover {
+        background: #334155;
+    }
+
+    th i {
+        margin-left: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    td {
+        color: var(--text-muted);
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: none;
+        color: white;
+    }
+
+    .edit-btn {
+        background: #3b82f6;
+    }
+
+    .edit-btn:hover {
+        background: #2563eb;
+    }
+
+    .delete-btn {
+        background: #ef4444;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+        .filters-section {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById('ips-table');
+        const tbody = document.getElementById('ip-list-body');
+        const filterInputs = document.querySelectorAll('.filter-input');
+        const clearBtn = document.getElementById('clear-filters');
+        let currentSort = { column: 'ip', direction: 'asc' };
+
+        // Função para ordenar a tabela
+        function sortTable(column, direction) {
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                const aValue = a.querySelector(`td[data-value="${column}"]`).getAttribute('data-value');
+                const bValue = b.querySelector(`td[data-value="${column}"]`).getAttribute('data-value');
+                
+                if (direction === 'asc') {
+                    return aValue.localeCompare(bValue);
+                } else {
+                    return bValue.localeCompare(aValue);
+                }
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Eventos de ordenação
+        table.querySelectorAll('th.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+
+                // Atualizar ícones
+                table.querySelectorAll('th i').forEach(icon => {
+                    icon.className = 'fas fa-sort';
+                });
+                header.querySelector('i').className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+
+                sortTable(currentSort.column, currentSort.direction);
+            });
+        });
+
+        // Função para filtrar a tabela
+        function filterTable() {
+            const ipFilter = document.getElementById('ip-filter').value.toLowerCase();
+            const nomeFilter = document.getElementById('nome-filter').value.toLowerCase();
+            const setorFilter = document.getElementById('setor-filter').value;
+            const tipoFilter = document.getElementById('tipo-filter').value;
+
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const ip = row.querySelector('td[data-value="ip"]').textContent.toLowerCase();
+                const nome = row.querySelector('td[data-value="nome"]').textContent.toLowerCase();
+                const setor = row.querySelector('td[data-value="setor"]').textContent;
+                const tipo = row.querySelector('td[data-value="tipo"]').textContent;
+
+                const matchesIp = ip.includes(ipFilter);
+                const matchesNome = nome.includes(nomeFilter);
+                const matchesSetor = !setorFilter || setor === setorFilter;
+                const matchesTipo = !tipoFilter || tipo === tipoFilter;
+
+                row.style.display = matchesIp && matchesNome && matchesSetor && matchesTipo ? '' : 'none';
+            });
+        }
+
+        // Eventos de filtro
+        filterInputs.forEach(input => {
+            input.addEventListener('input', filterTable);
+        });
+
+        // Limpar filtros
+        clearBtn.addEventListener('click', () => {
+            filterInputs.forEach(input => {
+                if (input.tagName === 'SELECT') {
+                    input.value = '';
+                } else {
+                    input.value = '';
+                }
+            });
+            filterTable();
+        });
+
+        // Inicializar ordenação
+        sortTable(currentSort.column, currentSort.direction);
+    });
+</script>
+{% endblock %} 
